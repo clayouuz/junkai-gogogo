@@ -8,14 +8,19 @@ import shutil  # 添加用于复制文件的模块
 import datetime
 import pytesseract
 from pdf2image import convert_from_path
+from dotenv import load_dotenv  # 添加dotenv支持
 
-# 设置你的OpenAI API Key
+# 加载.env文件中的环境变量
+load_dotenv()
+
+# 从环境变量中获取API密钥
 client = OpenAI(
-    api_key="",
-    base_url=""
-    )
+    api_key=os.getenv("OPENAI_API_KEY"),  # 从环境变量获取API密钥
+    base_url=os.getenv("OPENAI_BASE_URL")
+)
 model_name = "gemini-2.0-flash"
 limit_rpm = 15 # 限制每分钟请求数
+# limit_rpm = 0 # 不限制请求数
 
 def extract_text_from_pdf(pdf_path, max_pages=5):
     text = ""
@@ -92,8 +97,11 @@ def process_all_pdfs(folder_path, output_excel_path=None):
     # 如果未指定输出路径，则在脚本所在目录创建一个带时间戳的输出文件
     if output_excel_path is None:
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # 创建outputs文件夹(如果不存在)
+        outputs_folder = os.path.join(os.path.dirname(folder_path), "outputs")
+        os.makedirs(outputs_folder, exist_ok=True)
         output_excel_path = os.path.join(
-            os.path.dirname(folder_path), 
+            outputs_folder, 
             f"提取结果_{timestamp}.xlsx"
         )
     else:
@@ -175,9 +183,7 @@ def process_all_pdfs(folder_path, output_excel_path=None):
                 # 删除原文件
                 os.remove(full_path)
                 
-                processed_count += 1
-                print(f"✅ 已处理文件 {filename} 并更新Excel表格，共处理{processed_count}/{total_files}个文件")
-                
+                processed_count += 1                
             except Exception as e:
                 print(f"⚠️ 无法处理文件 {filename}：{e}")
                 # 复制文件到错误文件夹
@@ -187,8 +193,30 @@ def process_all_pdfs(folder_path, output_excel_path=None):
                 failed_files.append(filename)
             if limit_rpm > 0:
                 import time
-                # 控制请求速率，确保每分钟不超过 limit_rpm 次请求
-                time.sleep(60 / limit_rpm)
+                # 实现更精确的RPM控制
+                current_time = time.time()
+                
+                # 初始化时间窗口和请求计数（如果不存在）
+                if not hasattr(process_all_pdfs, 'request_times'):
+                    process_all_pdfs.request_times = []
+                
+                # 添加当前请求时间
+                process_all_pdfs.request_times.append(current_time)
+                
+                # 只保留最近一分钟内的请求记录
+                one_minute_ago = current_time - 60
+                process_all_pdfs.request_times = [t for t in process_all_pdfs.request_times if t > one_minute_ago]
+                
+                # 计算当前一分钟内的请求数
+                requests_in_window = len(process_all_pdfs.request_times)
+                
+                # 如果已达到或超过RPM限制，等待适当时间
+                if requests_in_window >= limit_rpm:
+                    # 计算需要等待的时间（直到最早的请求过期）
+                    wait_time = 60 - (current_time - process_all_pdfs.request_times[0]) + 0.1  # 额外0.1秒作为缓冲
+                    if wait_time > 0:
+                        print(f"达到RPM限制({requests_in_window}/{limit_rpm})，等待 {wait_time:.2f} 秒...")
+                        time.sleep(wait_time)
             
             pbar.update(1)
     
