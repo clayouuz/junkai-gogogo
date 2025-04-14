@@ -215,7 +215,8 @@ def process_all_pdfs(folder_path, output_excel_path=None):
                     # 计算需要等待的时间（直到最早的请求过期）
                     wait_time = 60 - (current_time - process_all_pdfs.request_times[0]) + 0.1  # 额外0.1秒作为缓冲
                     if wait_time > 0:
-                        print(f"达到RPM限制({requests_in_window}/{limit_rpm})，等待 {wait_time:.2f} 秒...")
+                        # 使用tqdm.write而不是print，这样不会干扰进度条
+                        tqdm.write(f"达到RPM限制({requests_in_window}/{limit_rpm})，等待 {wait_time:.2f} 秒...")
                         time.sleep(wait_time)
             
             pbar.update(1)
