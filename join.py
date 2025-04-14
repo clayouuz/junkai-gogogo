@@ -29,8 +29,8 @@ def integrate_excels(file_paths):
         return unique_df
     return None
 
-# 获取当前脚本所在目录
-script_dir = os.path.dirname(os.path.abspath(__file__))
+# 获取当前脚本所在目录,并在该目录定位"outputs"文件夹
+script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "outputs")
 
 # 使用正则表达式匹配目录下所有"提取结果_*.xlsx"文件
 pattern = os.path.join(script_dir, "提取结果_*.xlsx")

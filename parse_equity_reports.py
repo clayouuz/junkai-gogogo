@@ -133,13 +133,13 @@ def process_all_pdfs(folder_path, output_excel_path=None):
                 
                 # 检查提取的文本是否为空或过短
                 if not pdf_text or len(pdf_text.strip()) < 10:  # 假设少于10个字符视为无效文本
-                    print(f"⚠️ 文件 {filename} 常规提取未获取到有效文本，尝试使用OCR...")
+                    print(f"\n⚠️ 文件 {filename} 常规提取未获取到有效文本，尝试使用OCR...")
                     # 尝试使用OCR提取文本
                     pdf_text = ocr_pdf(full_path, lang='chi_sim')
                     
                     # 如果OCR也无法提取有效文本
                     if not pdf_text or len(pdf_text.strip()) < 10:
-                        print(f"⚠️ 文件 {filename} OCR提取也失败，将复制到错误文件夹")
+                        print(f"\n⚠️ 文件 {filename} OCR提取也失败，将复制到错误文件夹")
                         # 复制文件到错误文件夹
                         shutil.copy2(full_path, os.path.join(err_folder, filename))
                         # 删除原文件
@@ -185,7 +185,7 @@ def process_all_pdfs(folder_path, output_excel_path=None):
                 
                 processed_count += 1                
             except Exception as e:
-                print(f"⚠️ 无法处理文件 {filename}：{e}")
+                print(f"\n⚠️ 无法处理文件 {filename}：{e}")
                 # 复制文件到错误文件夹
                 shutil.copy2(full_path, os.path.join(err_folder, filename))
                 # 删除原文件
