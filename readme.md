@@ -4,7 +4,7 @@
 
 ### 使用方法：
 
-使用ocr功能需要安装Tesseract ，Poppler 
+使用ocr功能需要安装Tesseract ，Poppler，根据不同系统自行搜索安装方式 
 
 安装一些python包：
 
@@ -27,4 +27,5 @@ base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 部分数据无法提取,所以请处理完成后检查一下xlsx文件内有无异常值
 
 
-join.py可以把多次运行的结果合并起来，更加懒人
+join.py可以把多次运行的结果合并起来，更加懒人  
+pick.py把第一阶段的几年挑出来
