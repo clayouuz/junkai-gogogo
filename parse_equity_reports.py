@@ -18,7 +18,7 @@ client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),  # 从环境变量获取API密钥
     base_url=os.getenv("OPENAI_BASE_URL")
 )
-model_name = "gemini-2.0-flash"
+model_name = ""
 limit_rpm = 15 # 限制每分钟请求数
 # limit_rpm = 0 # 不限制请求数
 
