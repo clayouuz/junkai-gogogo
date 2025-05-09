@@ -21,19 +21,15 @@ folder_path = 'pdfs'
 # 读取Excel文件
 df = pd.read_excel(excel_file_path)
 
-# 保存'变动开始日期'和'变动结束日期'列
-start_dates = df['变动开始日期'].copy()
-end_dates = df['变动结束日期'].copy()
-
 # 遍历DataFrame的每一行
 for index, row in df.iterrows():
     if row['对或错'] == False:  # 检查B列的值是否为False
         correct_file_name = find_correct_file(row['文件名称'], folder_path)
         df.at[index, '文件名称'] = correct_file_name
 
-# 将保存的日期写回到DataFrame
-df['变动开始日期'] = start_dates
-df['变动结束日期'] = end_dates
+# 转换日期格式为'yyyy/mm/dd'
+df['变动开始日期'] = pd.to_datetime(df['变动开始日期'], errors='coerce').dt.strftime('%Y/%m/%d')
+df['变动结束日期'] = pd.to_datetime(df['变动结束日期'], errors='coerce').dt.strftime('%Y/%m/%d')
 
 # 将修改后的数据写回到Excel文件中
 df.to_excel(excel_file_path, index=False)
